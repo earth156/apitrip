@@ -32,19 +32,15 @@ conn.connect((err) => {
 app.use(express.json());
 
 // API showlotto
-app.get('/showlotto', (req, res) => {
-  const query = "SELECT * FROM lotto_numbers";
-  conn.query(query, (err, results) => {
-    if (err) {
-      console.error("Error executing query:", err);
-      return res.status(500).json({ error: "Internal Server Error" });
-    }
+app.get("/", (req, res) => {
+  console.log("Hello LOTTO!!!");
+  res.send("Hello LOTTO!!!"); 
+});
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: "ไม่พบข้อมูลเลข Lotto" });
-    }
 
-    res.json(results);
+app.get("/showlotto", (req, res) => {
+  db.all("SELECT * FROM lotto_numbers", [], (err, rows) => {
+    handleResponse(res, err, rows);
   });
 });
 
