@@ -2,7 +2,7 @@ const { error } = require("console");
 const express = require("express");
 const { request } = require("http");
 // const sqlite3 = require("sqlite3").verbose();
-const mysql = require(mysql2)
+const mysql = require("mysql2")
 const app = express();
 const port = 3000;
 
@@ -14,33 +14,40 @@ const port = 3000;
 //   }
 // });
 
-const conn  = mysql.createConnection({
+const conn = mysql.createConnection({
   host: "202.28.34.197",
   user: "web66_65011212054",
   password: "65011212054@csmsu",
-  dbname: "web66_65011212054"
-})
+  database: "web66_65011212054" // เปลี่ยนจาก dbname เป็น database
+});
 
 conn.connect((err) => {
-  if(err){
-    console.err("Error connect to Mysql",err);
+  if (err) {
+    console.error("Error connecting to MySQL:", err);
     return;
   }
-  console.log("connect success")
-}
-)
+  console.log("MySQL connected successfully");
+});
+
 app.use(express.json());
 
-app.get('/showlotto',(req,res)=> {
-  const {lotto_id,lotto_number} = req.body
-  const query = "Select * from lotto_numbers(lotto_id,lotto_number) VALUES(?,?)";
-  conn.query(query,[lotto_id,lotto_number], (err,results)=> {
-    if(err){
-      console.log("ไมพบข้อมูลเลข Lotto")
-      res.status(500).json({error: "internal Error"});
+// API showlotto
+app.get('/showlotto', (req, res) => {
+  const query = "SELECT * FROM lotto_numbers";
+  conn.query(query, (err, results) => {
+    if (err) {
+      console.error("Error executing query:", err);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-  })
-})
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "ไม่พบข้อมูลเลข Lotto" });
+    }
+
+    res.json(results);
+  });
+});
+
 // ------------------------------------------------------------
 // DESTINATIONS CRUD
 // ------------------------------------------------------------
@@ -519,3 +526,4 @@ Object.keys(ips).forEach(function (_interface) {
 app.listen(port, () => {
   console.log(`Lotto API listening at http://${ip}:${port}`);
 });
+

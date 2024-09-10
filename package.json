@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
+    "mysql2": "^3.11.1",
     "sqlite3": "^5.1.7"
   },
   "description": "=== INSTALL DEPENDENCIES === npm init -y npm install express sqlite3"
