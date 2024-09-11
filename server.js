@@ -18,15 +18,52 @@ app.use(express.json());
 // API showlotto
 app.get("/", (req, res) => {
   console.log("Hello LOTTO!!!");
-  res.send("Hello LOTTO!!!"); 
+  res.send("Hello LOTTO!!!");
 });
 
-
+// API showlotto - show all lotto numbers
 app.get("/showlotto", (req, res) => {
   db.all("SELECT * FROM lotto_numbers", [], (err, rows) => {
     handleResponse(res, err, rows);
   });
 });
+
+// API insertlotto - insert lotto number
+app.post("/insertlotto", (req, res) => {
+  const { lottonumber } = req.body;
+
+  // ตรวจสอบว่ามีข้อมูล lottonumber หรือไม่
+  if (!lottonumber) {
+    res.status(400).json({ error: "lottonumber is required" });
+    return;
+  }
+
+  const sql = "INSERT INTO lotto_numbers (lottonumber) VALUES (?)";
+
+  db.run(sql, [lottonumber], function (err) {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+
+    // คืนค่า response พร้อมกับ ID ที่เพิ่งถูกเพิ่ม
+    res.json({ message: "Lotto number inserted successfully", id: this.lastID });
+  });
+});
+
+// Helper function to handle API responses
+function handleResponse(res, err, data) {
+  if (err) {
+    res.status(500).json({ error: err.message });
+    return;
+  }
+  res.json(data);
+}
+
+app.listen(port, () => {
+  console.log(`Trip booking API listening at http://localhost:${port}`);
+});
+
 
 // ------------------------------------------------------------
 // DESTINATIONS CRUD
