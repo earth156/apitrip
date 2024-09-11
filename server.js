@@ -4,6 +4,8 @@ const { request } = require("http");
 const sqlite3 = require("sqlite3").verbose();
 const app = express();
 const port = 3000;
+const cors = require('cors');
+app.use(cors());
 
 const db = new sqlite3.Database("./db.db", (err) => {
   if (err) {
@@ -52,7 +54,7 @@ app.post("/insertlotto", (req, res) => {
 });
 
 app.get("/login", (req,res) =>{
-  
+
   
 })
 // Helper function to handle API responses
