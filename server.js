@@ -51,6 +51,10 @@ app.post("/insertlotto", (req, res) => {
   });
 });
 
+app.get("/login", (req,res) =>{
+  
+  
+})
 // Helper function to handle API responses
 function handleResponse(res, err, data) {
   if (err) {
@@ -59,6 +63,8 @@ function handleResponse(res, err, data) {
   }
   res.json(data);
 }
+
+
 
 // app.listen(port, () => {
 //   console.log(`Trip booking API listening at http://localhost:${port}`);
