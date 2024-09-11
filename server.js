@@ -23,24 +23,24 @@ app.get("/", (req, res) => {
 
 // API showlotto - show all lotto numbers
 app.get("/showlotto", (req, res) => {
-  db.all("SELECT * FROM lotto_numbers", [], (err, rows) => {
+  db.all("SELECT * FROM lotto_nunber", [], (err, rows) => {
     handleResponse(res, err, rows);
   });
 });
 
 // API insertlotto - insert lotto number
 app.post("/insertlotto", (req, res) => {
-  const { lottonumber } = req.body;
+  const { lotto_num } = req.body;
 
   // ตรวจสอบว่ามีข้อมูล lottonumber หรือไม่
-  if (!lottonumber) {
+  if (!lotto_num) {
     res.status(400).json({ error: "lottonumber is required" });
     return;
   }
 
-  const sql = "INSERT INTO lotto_numbers (lottonumber) VALUES (?)";
+  const sql = "INSERT INTO lotto_nunber (lotto_num) VALUES (?)";
 
-  db.run(sql, [lottonumber], function (err) {
+  db.run(sql, [lotto_num], function (err) {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
@@ -60,9 +60,9 @@ function handleResponse(res, err, data) {
   res.json(data);
 }
 
-app.listen(port, () => {
-  console.log(`Trip booking API listening at http://localhost:${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`Trip booking API listening at http://localhost:${port}`);
+// });
 
 
 // ------------------------------------------------------------
