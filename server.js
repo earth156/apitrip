@@ -1,32 +1,16 @@
 const { error } = require("console");
 const express = require("express");
 const { request } = require("http");
-// const sqlite3 = require("sqlite3").verbose();
-const mysql = require("mysql2")
+const sqlite3 = require("sqlite3").verbose();
 const app = express();
 const port = 3000;
 
-// const db = new sqlite3.Database("./tripbooking.db", (err) => {
-//   if (err) {
-//     console.error(err.message);
-//   } else {
-//     console.log("Connected to the tripbooking database.");
-//   }
-// });
-
-const conn = mysql.createConnection({
-  host: "202.28.34.197",
-  user: "web66_65011212054",
-  password: "65011212054@csmsu",
-  database: "web66_65011212054" // เปลี่ยนจาก dbname เป็น database
-});
-
-conn.connect((err) => {
+const db = new sqlite3.Database("./db.db", (err) => {
   if (err) {
-    console.error("Error connecting to MySQL:", err);
-    return;
+    console.error(err.message);
+  } else {
+    console.log("Connected to the tripbooking database.");
   }
-  console.log("MySQL connected successfully");
 });
 
 app.use(express.json());
