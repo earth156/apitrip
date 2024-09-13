@@ -98,9 +98,9 @@ app.post("/register", (req, res) => {
     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบทุกช่อง" });
   }
 
-  const sql = "INSERT INTO users (username, password, email, phone, img, types) VALUES (?, ?, ?, ?, ?, ?)";
+  const sql = "INSERT INTO users (username, password, email, phone, img, types,money) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-  db.run(sql, [username, password, email, phone, img, 'customer'], function (err) {
+  db.run(sql, [username, password, email, phone, img, 'customer', '2500'], function (err) {
     if (err) {
       res.status(500).json({ error: err.message });
       return;
@@ -111,18 +111,74 @@ app.post("/register", (req, res) => {
   });
 });
 
-// API สำหรับดึงข้อมูลผู้ใช้
-app.get('/showUser', (req, res) => {
-  const sql = 'SELECT * FROM users'; // เปลี่ยนคำสั่ง SQL ตามโครงสร้างฐานข้อมูลของคุณ
+app.get('/showUser/:user_id', (req, res) => {
+  const userId = req.params.user_id; // รับค่า user_id จาก URL parameter
 
-  db.all(sql, [], (err, rows) => {
+  // ตรวจสอบและล็อกค่า userId
+  console.log('Received user_id:', userId);
+
+  const sql = 'SELECT * FROM users WHERE user_id = ?'; // คำสั่ง SQL เพื่อดึงข้อมูลผู้ใช้ตาม user_id
+
+  db.get(sql, [userId], (err, row) => {
     if (err) {
-      console.error('เกิดข้อผิดพลาดในการดึงข้อมูลจากฐานข้อมูล:', err.message); // แสดงข้อผิดพลาดในคอนโซล
-      return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้' }); // ส่งข้อความข้อผิดพลาดเป็นภาษาไทยไปยังผู้ใช้
+      console.error('เกิดข้อผิดพลาดในการดึงข้อมูลจากฐานข้อมูล:', err.message);
+      return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้' });
     }
-    res.json(rows); // ส่งข้อมูลผู้ใช้ทั้งหมดเป็น JSON
+    if (row) {
+      res.json(row); // ส่งข้อมูลผู้ใช้ที่ตรงกับ user_id เป็น JSON
+    } else {
+      res.status(404).json({ error: 'ไม่พบผู้ใช้ที่มี user_id นี้' });
+    }
   });
 });
+;
+app.put('/editUser/:user_id', (req, res) => {
+  const userId = req.params.user_id; // รับค่า user_id จาก URL parameter
+  const { username, email, phone, password, img, types, money } = req.body; // รับข้อมูลที่ต้องการอัพเดตจาก request body
+
+  // ตรวจสอบและล็อกค่า userId และข้อมูลอื่นๆ
+  console.log('Received user_id:', userId);
+  console.log('Received data:', { username, email, phone, password, img, types, money });
+
+  // ตรวจสอบค่าที่รับมาว่ามีข้อมูลที่ต้องการอัพเดตหรือไม่
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  // ตรวจสอบค่าของ img
+  const getUserQuery = 'SELECT img FROM users WHERE user_id = ?';
+  db.get(getUserQuery, [userId], (err, row) => {
+    if (err) {
+      console.error('Error fetching user data:', err);
+      return res.status(500).json({ error: 'Failed to fetch user data' });
+    }
+
+    const currentImg = row?.img || ''; // ใช้ค่าปัจจุบันถ้ามี
+
+    const updateQuery = `
+      UPDATE users
+      SET username = ?, email = ?, phone = ?, password = ?, img = ?, types = ?, money = ?
+      WHERE user_id = ?
+    `;
+    
+    const updateValues = [username, email, phone, password, img || currentImg, types, money, userId];
+
+    db.run(updateQuery, updateValues, function (err) {
+      if (err) {
+        console.error('Error updating user:', err);
+        return res.status(500).json({ error: 'Failed to update user' });
+      }
+
+      res.json({ message: 'User updated successfully', result: this.changes });
+    });
+  });
+});
+
+
+
+
+
+
 
 // Helper function to handle API responses
 function handleResponse(res, err, data) {
