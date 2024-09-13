@@ -5,6 +5,8 @@ const { request } = require("http");
 const sqlite3 = require("sqlite3").verbose();
 const app = express();
 const port = 3000;
+const cors = require('cors');
+app.use(cors());
 
 
 const db = new sqlite3.Database("./db.db", (err) => {
@@ -25,7 +27,7 @@ app.get("/", (req, res) => {
 
 // API showlotto - show all lotto numbers
 app.get("/showlotto", (req, res) => {
-  db.all("SELECT * FROM lotto_nunber", [], (err, rows) => {
+  db.all("SELECT lotto_num,price,lotto_id FROM lotto_nunber", [], (err, rows) => {
     handleResponse(res, err, rows);
   });
 });
@@ -60,7 +62,6 @@ app.post("/login", (req, res) => {
     return res.status(400).json({ error: "Username and password are required" });
   }
 
-  // Query to check if the user exists and the password matches
   const sql = "SELECT * FROM users WHERE username = ? AND password = ?";
 
   db.get(sql, [username, password], (err, row) => {
@@ -71,7 +72,14 @@ app.post("/login", (req, res) => {
     if (row) {
       // User exists and password matches
       res.json({
-        message: "Login successful"
+        message: "Login successful",
+        user_id: row.user_id,
+        types: row.types,
+        username: row.username,
+        password: row.password,
+        phone: row.phone,
+        email: row.email,
+        img: row.img // ส่งเฉพาะข้อมูลที่ต้องการ
       });
     } else {
       // User does not exist or password does not match
@@ -79,7 +87,6 @@ app.post("/login", (req, res) => {
     }
   });
 });
-
 
 
 // API register - insert user into users table
@@ -101,6 +108,19 @@ app.post("/register", (req, res) => {
 
     // คืนค่า response พร้อมกับ ID ที่เพิ่งถูกเพิ่ม
     res.json({ message: "User registered successfully", id: this.lastID });
+  });
+});
+
+// API สำหรับดึงข้อมูลผู้ใช้
+app.get('/showUser', (req, res) => {
+  const sql = 'SELECT * FROM users'; // เปลี่ยนคำสั่ง SQL ตามโครงสร้างฐานข้อมูลของคุณ
+
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      console.error('เกิดข้อผิดพลาดในการดึงข้อมูลจากฐานข้อมูล:', err.message); // แสดงข้อผิดพลาดในคอนโซล
+      return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการดึงข้อมูลผู้ใช้' }); // ส่งข้อความข้อผิดพลาดเป็นภาษาไทยไปยังผู้ใช้
+    }
+    res.json(rows); // ส่งข้อมูลผู้ใช้ทั้งหมดเป็น JSON
   });
 });
 
